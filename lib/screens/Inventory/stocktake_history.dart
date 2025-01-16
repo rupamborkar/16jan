@@ -1,0 +1,316 @@
+import 'package:flutter/material.dart';
+
+class StocktakeHistoryDetail extends StatefulWidget {
+  final int inventoryId;
+  final List<Map<String, dynamic>> inventoryData;
+
+  const StocktakeHistoryDetail({
+    super.key,
+    required this.inventoryId,
+    required this.inventoryData,
+  });
+
+  @override
+  State<StocktakeHistoryDetail> createState() => _StocktakeHistoryDetailState();
+}
+
+class _StocktakeHistoryDetailState extends State<StocktakeHistoryDetail> {
+  List<Map<String, dynamic>> inventories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchStocktakeDetails();
+  }
+
+  Future<void> fetchStocktakeDetails() async {
+    // Find the inventory data for the given inventoryId
+    final selectedInventory = widget.inventoryData.firstWhere(
+      (inventory) => inventory['id'] == widget.inventoryId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    if (selectedInventory != null) {
+      // Extract and map operations for the selected inventory
+      final List<Map<String, dynamic>> extractedInventories =
+          (selectedInventory['operations'] as List<dynamic>)
+              .map((operation) => {
+                    'id': operation['ingredient_id'],
+                    'name': operation['ingredient_name'],
+                    'price': operation['price'],
+                    'quantity': operation['quantity'],
+                    'quantity_unit': operation['quantity_unit'],
+                  })
+              .toList();
+
+      setState(() {
+        inventories = extractedInventories;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            size: 15,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(
+          'Stocktake',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 30, 20, 30),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.grey,
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Expanded(
+                      child: Text(
+                        'Ingredient',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Quantity',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Price',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                inventories.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: inventories.length,
+                          itemBuilder: (context, index) {
+                            final item = inventories[index];
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      item['name'] ?? 'N/A',
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      '${item['quantity']} ${item['quantity_unit']}',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      '${item['price']}',
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+// class StocktakeHistoryDetail extends StatefulWidget {
+//   const StocktakeHistoryDetail(
+//       {super.key,
+//       required inventoryId,
+//       required List<Map<String, dynamic>> inventoryData});
+
+//   @override
+//   State<StocktakeHistoryDetail> createState() => _StocktakeHistoryDetailState();
+// }
+
+// class _StocktakeHistoryDetailState extends State<StocktakeHistoryDetail> {
+//   List<Map<String, dynamic>> inventoryHistoryData = [];
+//   List<Map<String, dynamic>> inventories = [];
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     fetchStocktakeDetails();
+//   }
+
+//   // }
+
+//   Future<void> fetchStocktakeDetails() async {
+//     setState(() {
+//       inventories = List<Map<String, dynamic>>.from(
+//         widget.inventoryData['operations'].map((inventory) => {
+//               'id': inventory['ingredient_id'],
+//               'name': inventory['ingredient_name'],
+//               'price': double.parse(inventory['price']),
+//               'quantity': inventory['quantity'],
+//               'quantity_unit': inventory['quantity_unit'],
+//               // 'type': inventory['type'],
+//             }),
+//       );
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//         appBar: AppBar(
+//           leading: IconButton(
+//             icon: const Icon(
+//               Icons.arrow_back_ios,
+//               size: 15,
+//               color: AppColors.hintColor,
+//             ),
+//             onPressed: () {
+//               Navigator.pop(context);
+//             },
+//           ),
+//           title: const Text(
+//             'Current Inventory',
+//             style: AppTextStyles.heading,
+//           ),
+//           centerTitle: true,
+//         ),
+//         body: Padding(
+//           padding: const EdgeInsets.fromLTRB(20, 30, 20, 30),
+//           child: Container(
+//             decoration: BoxDecoration(
+//               border: Border.all(
+//                 color: AppColors.borderColor,
+//                 width: 1.0,
+//               ),
+//               borderRadius: BorderRadius.circular(8.0),
+//             ),
+//             child: Padding(
+//               padding: const EdgeInsets.all(8.0),
+//               child: Column(
+//                 children: [
+//                   Row(
+//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                     children: [
+//                       Expanded(
+//                         child: Text(
+//                           'Ingredient',
+//                           style: AppTextStyles.nameFormat,
+//                         ),
+//                       ),
+//                       Expanded(
+//                         child: Text(
+//                           'Quantity',
+//                           style: AppTextStyles.nameFormat,
+//                           textAlign: TextAlign.center,
+//                         ),
+//                       ),
+//                       Expanded(
+//                         child: Text(
+//                           'Price',
+//                           style: AppTextStyles.nameFormat,
+//                           textAlign: TextAlign.right,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                   const Divider(),
+//                   inventories.isEmpty
+//                       ? const Center(child: CircularProgressIndicator())
+//                       : SingleChildScrollView(
+//                           child: ConstrainedBox(
+//                             constraints: BoxConstraints(
+//                               minHeight:
+//                                   100, // Set a minimum height for the box
+//                             ),
+//                             child: ListView.builder(
+//                               shrinkWrap: true,
+//                               physics:
+//                                   NeverScrollableScrollPhysics(), // Disable internal scrolling
+//                               itemCount: inventories.length,
+//                               itemBuilder: (context, index) {
+//                                 final item = inventories[index];
+//                                 return Padding(
+//                                   padding:
+//                                       const EdgeInsets.symmetric(vertical: 8.0),
+//                                   child: Row(
+//                                     mainAxisAlignment:
+//                                         MainAxisAlignment.spaceBetween,
+//                                     children: [
+//                                       // Ingredient Name
+//                                       Expanded(
+//                                         child: Text(
+//                                           item['name'] ?? 'N/A',
+//                                           style: AppTextStyles.valueFormat,
+//                                         ),
+//                                       ),
+//                                       // Quantity
+//                                       Expanded(
+//                                         child: Text(
+//                                           item['quantity'].toString() ?? 'N/A',
+//                                           style: AppTextStyles.valueFormat,
+//                                           textAlign: TextAlign.center,
+//                                         ),
+//                                       ),
+//                                       // Price
+//                                       Expanded(
+//                                         child: Text(
+//                                           item['price'].toString() ?? 'N/A',
+//                                           style: AppTextStyles.valueFormat,
+//                                           textAlign: TextAlign.right,
+//                                         ),
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 );
+//                               },
+//                             ),
+//                           ),
+//                         ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ));
+//   }
+// }
